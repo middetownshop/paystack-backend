@@ -1,0 +1,56 @@
+modules = ["nodejs-24"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
+
+[[ports]]
+localPort = 3001
+externalPort = 3002
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
+exposeLocalhost = true
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 22778
+
+[userenv]
+
+[userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyA-0l64W0lwT5ApnLMLC9XOrEuJFo7IcAY"
+VITE_FIREBASE_AUTH_DOMAIN = "richdata-ee29f.firebaseapp.com"
+VITE_FIREBASE_DATABASE_URL = "https://richdata-ee29f-default-rtdb.firebaseio.com"
+VITE_FIREBASE_PROJECT_ID = "richdata-ee29f"
+VITE_FIREBASE_STORAGE_BUCKET = "richdata-ee29f.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "487993520516"
+VITE_FIREBASE_APP_ID = "1:487993520516:web:cd778b6adba9ce0d3fadd1"
+VITE_FIREBASE_MEASUREMENT_ID = "G-BZ46K7ZDQT"

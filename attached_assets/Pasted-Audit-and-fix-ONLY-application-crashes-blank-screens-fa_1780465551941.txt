@@ -1,0 +1,65 @@
+Audit and fix ONLY application crashes, blank screens, failed imports, routing errors, and build/runtime errors. Do NOT modify Paystack, wallet logic, bundle pricing, commissions, Firebase data structure, UI design, business logic, or styling unless directly required to stop a crash.
+
+Tasks:
+
+1. Scan the entire project for:
+
+   * Missing files
+   * Broken imports
+   * Incorrect import paths
+   * Circular dependencies
+   * Duplicate files with conflicting names
+   * Missing exports
+   * Missing default exports
+   * TypeScript compilation errors
+   * Vite build errors
+   * React runtime errors
+   * Wouter route errors
+
+2. Verify these files exist and are imported correctly:
+
+   * src/App.tsx
+   * src/contexts/AuthContext.tsx
+   * src/contexts/useAuth.ts
+   * src/components/DashboardLayout.tsx
+
+3. Search for every useAuth import and ensure they all point to the actual file location. Fix broken references automatically.
+
+4. Search for every DashboardLayout import and ensure the target file exists and exports correctly.
+
+5. Remove imports referencing files that do not exist.
+
+6. Run a full TypeScript check and fix all compile errors.
+
+7. Run a full Vite build and fix all build errors.
+
+8. Fix all JSX syntax errors including:
+
+   * Unterminated JSX contents
+   * Missing closing tags
+   * Invalid fragments
+   * Invalid component returns
+
+9. Ensure every page component returns valid JSX.
+
+10. Ensure no page crashes when rendered.
+
+11. Ensure App.tsx loads successfully.
+
+12. Ensure workspace preview loads without a white screen.
+
+13. After fixes, provide a report showing:
+
+* Files modified
+* Errors found
+* Errors fixed
+* Remaining errors (if any)
+
+IMPORTANT:
+
+* Do NOT change Paystack.
+* Do NOT change wallet logic.
+* Do NOT change Firebase collections.
+* Do NOT change bundle purchasing logic.
+* Do NOT refactor working code.
+* Fix only issues that cause crashes, blank screens, build failures, import failures, or runtime failures.
