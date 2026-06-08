@@ -1,6 +1,9 @@
 import { Router } from "express";
 import crypto from "crypto";
-import { db, auth } from "../firebaseAdmin";
+import admin from "../firebaseAdmin";
+
+const db = admin.firestore();
+const auth = admin.auth();
 
 const paystackRouter = Router();
 

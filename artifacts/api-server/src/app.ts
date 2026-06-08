@@ -58,7 +58,7 @@ app.use(
 app.use(cors());
 
 // ─────────────────────────────────────────────
-// 🔥 IMPORTANT: RAW BODY SUPPORT (PAYSTACK WEBHOOK)
+// BODY PARSING (PAYSTACK WEBHOOK SAFE)
 // ─────────────────────────────────────────────
 app.use(
   express.json({
@@ -71,12 +71,18 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 
 // ─────────────────────────────────────────────
-// ROUTES
+// ROOT ROUTE (FIX FOR "Cannot GET /")
 // ─────────────────────────────────────────────
-app.use("/api", router);
+app.get("/", (_req, res) => {
+  res.json({
+    status: "running",
+    service: "paystack-api",
+    message: "API is live and working",
+  });
+});
 
 // ─────────────────────────────────────────────
-// HEALTH CHECK (OPTIONAL BUT GOOD)
+// HEALTH CHECK
 // ─────────────────────────────────────────────
 app.get("/health", (_req, res) => {
   res.json({
@@ -84,5 +90,10 @@ app.get("/health", (_req, res) => {
     service: "paystack-api",
   });
 });
+
+// ─────────────────────────────────────────────
+// API ROUTES
+// ─────────────────────────────────────────────
+app.use("/api", router);
 
 export default app;
