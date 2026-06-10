@@ -16,10 +16,8 @@ import {
   Store,
   ShoppingBag,
   Zap,
-  Sparkles,
   Wifi,
   Menu,
-  X,
 } from "lucide-react";
 
 import { format } from "date-fns";
@@ -36,14 +34,14 @@ export function DashboardLayout({
   const [time, setTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  /* REDIRECT IF NOT LOGGED IN */
+  /* REDIRECT */
   useEffect(() => {
     if (!loading && !user) {
       setLocation("/login");
     }
   }, [user, loading, setLocation]);
 
-  /* LIVE CLOCK */
+  /* CLOCK */
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
@@ -56,12 +54,12 @@ export function DashboardLayout({
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
+        Loading...
       </div>
     );
   }
 
-  /* SAFE PROFILE (IMPORTANT FIX) */
+  /* SAFE PROFILE */
   const safeProfile = profile ?? {
     name: "User",
     role: "user",
@@ -73,21 +71,6 @@ export function DashboardLayout({
     if (h < 12) return "Good morning";
     if (h < 18) return "Good afternoon";
     return "Good evening";
-  };
-
-  const getTimeToMidnight = () => {
-    const midnight = new Date(time);
-    midnight.setHours(24, 0, 0, 0);
-
-    const diff = midnight.getTime() - time.getTime();
-
-    const hours = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
-
-    return `${hours.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const navItems = [
@@ -155,9 +138,9 @@ export function DashboardLayout({
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b flex items-center justify-between px-4">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -182,7 +165,7 @@ export function DashboardLayout({
 
       <div className="flex pt-16">
         {/* SIDEBAR */}
-        <aside className="w-72 hidden md:block border-r p-4">
+        <aside className="w-72 hidden md:block border-r bg-white p-4">
           <div className="mb-4 font-bold">
             {safeProfile.name}
           </div>
