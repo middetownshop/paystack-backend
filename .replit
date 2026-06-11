@@ -24,16 +24,43 @@ localPort = 3000
 externalPort = 5000
 
 [[ports]]
+localPort = 4173
+externalPort = 8008
+
+[[ports]]
+localPort = 4174
+externalPort = 8099
+
+[[ports]]
+localPort = 4175
+externalPort = 9000
+
+[[ports]]
 localPort = 5000
 externalPort = 5173
 
 [[ports]]
 localPort = 5173
-externalPort = 6000
 
 [[ports]]
 localPort = 5174
 externalPort = 4200
+
+[[ports]]
+localPort = 5175
+externalPort = 6000
+
+[[ports]]
+localPort = 5176
+externalPort = 6800
+
+[[ports]]
+localPort = 5177
+externalPort = 8000
+
+[[ports]]
+localPort = 5178
+externalPort = 8080
 
 [[ports]]
 localPort = 8080
@@ -58,3 +85,6 @@ externalPort = 3003
 [[ports]]
 localPort = 25797
 externalPort = 3000
+
+[nix]
+packages = ["lsof", "nano"]

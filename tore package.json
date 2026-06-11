@@ -1,0 +1,49 @@
+[1mdiff --git a/artifacts/middletown-shop/package.json b/artifacts/middletown-shop/package.json[m
+[1mindex 48b86d8..f2b4565 100644[m
+[1m--- a/artifacts/middletown-shop/package.json[m
+[1m+++ b/artifacts/middletown-shop/package.json[m
+[36m@@ -5,20 +5,14 @@[m
+   "type": "module",[m
+   "scripts": {[m
+     "dev": "vite --config vite.config.ts --host 0.0.0.0",[m
+[31m-[m
+     "build": "vite build --config vite.config.ts",[m
+[31m-[m
+     "build:vercel": "vite build --config vite.config.ts",[m
+[31m-[m
+     "preview": "vite preview --config vite.config.ts --host 0.0.0.0",[m
+[31m-[m
+     "typecheck": "tsc -p tsconfig.json --noEmit"[m
+   },[m
+[31m-[m
+   "dependencies": {[m
+     "firebase": "^12.14.0"[m
+   },[m
+[31m-[m
+   "devDependencies": {[m
+     "@hookform/resolvers": "^3.10.0",[m
+     "@radix-ui/react-accordion": "^1.2.4",[m
+[36m@@ -51,6 +45,7 @@[m
+     "@replit/vite-plugin-cartographer": "catalog:",[m
+     "@replit/vite-plugin-dev-banner": "catalog:",[m
+     "@replit/vite-plugin-runtime-error-modal": "catalog:",[m
+[32m+[m[32m    "@tailwindcss/postcss": "^4.3.0",[m
+     "@tailwindcss/typography": "^0.5.15",[m
+     "@tailwindcss/vite": "catalog:",[m
+     "@tanstack/react-query": "catalog:",[m
+[36m@@ -59,6 +54,7 @@[m
+     "@types/react-dom": "catalog:",[m
+     "@vitejs/plugin-react": "catalog:",[m
+     "@workspace/api-client-react": "workspace:*",[m
+[32m+[m[32m    "autoprefixer": "^10.5.0",[m
+     "class-variance-authority": "catalog:",[m
+     "clsx": "catalog:",[m
+     "cmdk": "^1.1.1",[m
+[36m@@ -68,6 +64,7 @@[m
+     "input-otp": "^1.4.2",[m
+     "lucide-react": "catalog:",[m
+     "next-themes": "^0.4.6",[m
+[32m+[m[32m    "postcss": "^8.5.15",[m
+     "react": "catalog:",[m
+     "react-day-picker": "^9.11.1",[m
+     "react-dom": "catalog:",[m
