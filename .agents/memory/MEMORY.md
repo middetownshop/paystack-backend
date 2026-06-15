@@ -1,0 +1,2 @@
+- [MiddletownShop theme](middletown-shop-theme.md) — sidebar must stay dark navy in both light & dark mode; primary = green; background = cool light gray
+- [MiddletownShop auth](middletown-shop-auth.md) — two auth hooks intentionally coexist; loading hang fixed via onSnapshot error handler + safety timeout

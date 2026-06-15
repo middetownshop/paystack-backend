@@ -14,15 +14,15 @@ export default function Withdraw() {
           Withdraw Funds
         </h1>
 
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           Withdraw your earned profit.
         </p>
       </div>
 
       {/* PROFIT BALANCE */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between">
+      <div className="bg-card border border-border rounded-xl p-5 flex items-center justify-between">
         <div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Available Profit
           </p>
 
@@ -60,7 +60,7 @@ export default function Withdraw() {
         Withdrawals Unavailable
       </button>
 
-      <p className="text-xs text-center text-gray-400">
+      <p className="text-xs text-center text-muted-foreground">
         Withdrawal functionality will be enabled in a future update.
       </p>
     </div>
