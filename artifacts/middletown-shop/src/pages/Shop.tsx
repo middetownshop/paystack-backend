@@ -134,7 +134,7 @@ export default function ShopProducts() {
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 bg-white/90 text-foreground"
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function ShopProducts() {
                   {product.name}
                 </h3>
 
-                <p className="text-xs text-gray-500 line-clamp-2">
+                <p className="text-xs text-muted-foreground line-clamp-2">
                   {product.description}
                 </p>
 
@@ -201,7 +201,7 @@ export default function ShopProducts() {
 
                 <div>
                   {hasDiscount && (
-                    <p className="text-xs line-through text-gray-400">
+                    <p className="text-xs line-through text-muted-foreground">
                       GHS {formatMoney(product.price)}
                     </p>
                   )}

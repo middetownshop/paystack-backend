@@ -324,7 +324,7 @@ export default function Dashboard() {
                 <p className="font-semibold">{tx.type}</p>
 
                 <p>
-                  GHS {Number(tx.businessAmount ?? tx.amount ?? 0).toFixed(2)}
+                  GHS {Number(tx.amount || 0).toFixed(2)}
                 </p>
               </div>
             ))}

@@ -77,6 +77,7 @@ function Router() {
       <Route path="/agent-register" component={AgentRegister} />
 
       {/* DASHBOARD CORE */}
+      <Route path="/dashboard/agent-register" component={() => <DashboardRoute component={AgentRegister} />} />
       <Route path="/dashboard" component={() => <DashboardRoute component={Dashboard} />} />
       <Route path="/dashboard/wallet" component={() => <DashboardRoute component={Wallet} />} />
       <Route path="/dashboard/deposit" component={() => <DashboardRoute component={Deposit} />} />

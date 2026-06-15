@@ -189,8 +189,13 @@ export function DashboardLayout({
           </div>
         </div>
 
-        <div className="hidden md:block text-sm text-muted-foreground">
-          {getGreeting()}, {safeProfile.name}
+        <div className="hidden md:flex flex-col items-center text-center">
+          <span className="text-sm font-medium text-foreground">
+            {getGreeting()}, {safeProfile.name}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {format(time, "EEE, MMM d yyyy")} &middot; {format(time, "HH:mm:ss")}
+          </span>
         </div>
 
         <Button variant="ghost" size="icon">
