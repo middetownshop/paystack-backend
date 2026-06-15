@@ -127,7 +127,7 @@ function PhoneModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-card shadow-2xl">
+      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
         {/* Top Gradient */}
         <div
           className="absolute top-0 left-0 right-0 h-1.5"
@@ -151,11 +151,11 @@ function PhoneModal({
               </div>
 
               <div>
-                <h3 className="font-black text-xl text-foreground">
+                <h3 className="font-black text-xl text-black">
                   Checkout
                 </h3>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Complete your purchase
                 </p>
               </div>
@@ -164,7 +164,7 @@ function PhoneModal({
             {!loading && (
               <button
                 onClick={onClose}
-                className="text-muted-foreground hover:text-foreground transition"
+                className="text-gray-500 hover:text-black transition"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -191,11 +191,11 @@ function PhoneModal({
                   {cfg.logo} {bundle.network}
                 </Badge>
 
-                <h2 className="text-3xl font-black text-foreground">
+                <h2 className="text-3xl font-black text-black">
                   {bundle.size}
                 </h2>
 
-                <p className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                <p className="flex items-center gap-1 text-sm text-gray-500 mt-2">
                   <Clock className="h-3 w-3" />
                   {bundle.validity}
                 </p>
@@ -204,10 +204,10 @@ function PhoneModal({
               <div className="text-right">
                 {isAgentPricing ? (
                   <>
-                    <p className="text-3xl font-black text-foreground">
+                    <p className="text-3xl font-black text-black">
                       GHS {formatGHS(finalPrice)}
                     </p>
-                    <p className="text-sm line-through text-muted-foreground">
+                    <p className="text-sm line-through text-gray-400">
                       GHS {formatGHS(basePrice)}
                     </p>
                     <p className="text-[11px] font-bold text-green-600 mt-0.5">
@@ -215,12 +215,12 @@ function PhoneModal({
                     </p>
                   </>
                 ) : (
-                  <p className="text-3xl font-black text-foreground">
+                  <p className="text-3xl font-black text-black">
                     GHS {formatGHS(basePrice)}
                   </p>
                 )}
 
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   Wallet: GHS {formatGHS(balance)}
                 </p>
               </div>
@@ -229,7 +229,7 @@ function PhoneModal({
 
           {/* Payment Methods */}
           <div className="space-y-2">
-            <Label className="text-foreground">
+            <Label className="text-black">
               Select Payment Method
             </Label>
 
@@ -246,16 +246,16 @@ function PhoneModal({
                   paymentMethod ===
                   "paystack"
                     ? "border-primary bg-primary/5"
-                    : "border-border"
+                    : "border-gray-200"
                 }`}
               >
                 <CreditCard className="h-5 w-5 mb-2 text-primary" />
 
-                <p className="font-bold text-foreground">
+                <p className="font-bold text-black">
                   Paystack
                 </p>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Card / MOMO
                 </p>
               </button>
@@ -273,7 +273,7 @@ function PhoneModal({
                   paymentMethod ===
                   "wallet"
                     ? "border-primary bg-primary/5"
-                    : "border-border"
+                    : "border-gray-200"
                 } ${
                   !canUseWallet
                     ? "opacity-50"
@@ -282,11 +282,11 @@ function PhoneModal({
               >
                 <Wallet className="h-5 w-5 mb-2 text-primary" />
 
-                <p className="font-bold text-foreground">
+                <p className="font-bold text-black">
                   Wallet
                 </p>
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Use balance
                 </p>
               </button>
@@ -301,7 +301,7 @@ function PhoneModal({
             <div className="space-y-2">
               <Label
                 htmlFor="phone"
-                className="text-foreground"
+                className="text-black"
               >
                 Recipient Number
               </Label>
@@ -310,7 +310,7 @@ function PhoneModal({
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="0257869403"
+                  placeholder="0241234567"
                   value={phone}
                   disabled={loading}
                   onChange={(e) =>
@@ -445,86 +445,38 @@ export default function QuickSell() {
 
     const finalPrice = getBundlePrice(selectedBundle, profile);
 
-    // ================= PAYSTACK =================
+    // PAYSTACK
     if (paymentMethod === "paystack") {
       try {
         setBuying(true);
 
-        // Use profile.email (Firestore string, always set) with fallback to Firebase User email
-        const email = profile?.email ?? user?.email;
-        console.log("[QuickSell] Starting Paystack init", { email, finalPrice, bundleId: selectedBundle.id });
-
-        if (!email) {
-          throw new Error("User email not available. Please try again.");
-        }
-        if (!user?.uid) {
-          throw new Error("User not authenticated. Please log in again.");
-        }
-
-        const callbackUrl =
-          window.location.origin +
-          (import.meta.env.BASE_URL || "/").replace(/\/$/, "") +
-          "/dashboard/deposit";
-
-        const requestBody = {
-          email,
-          // finalPrice is already in GHS — backend converts to pesewas (×100)
-          amount: finalPrice,
-          callback_url: callbackUrl,
-          metadata: {
-            userId: user.uid,
-            bundleId: selectedBundle.id,
-            phone,
-            network: selectedBundle.network,
-            size: selectedBundle.size,
-            paymentType: "bundle_purchase",
-          },
-        };
-
-        console.log("[QuickSell] Sending to /api/paystack/initialize:", requestBody);
-
-        const response = await fetch("/api/paystack/initialize", {
+        const res = await fetch("/api/paystack/paystack/buy", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user?.email,
+            amount: finalPrice,
+            productId: selectedBundle.id,
+            userId: user?.uid,
+          }),
         });
 
-        console.log("[QuickSell] Response status:", response.status);
+        const data = await res.json();
 
-        const text = await response.text();
-        console.log("[QuickSell] Raw response body:", text);
-
-        let data: any;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          console.error("[QuickSell] JSON parse failed. Raw text was:", JSON.stringify(text));
-          throw new Error(
-            `Server returned non-JSON response (status ${response.status}). Check API server logs.`
-          );
+        if (!res.ok || !data?.data?.authorization_url) {
+          throw new Error(data?.message || "Paystack init failed");
         }
 
-        console.log("[QuickSell] Parsed response:", data);
-
-        if (!response.ok || !data?.success) {
-          throw new Error(data?.message || "Paystack initialization failed");
-        }
-
-        if (!data?.data?.authorization_url) {
-          throw new Error("No authorization_url in Paystack response");
-        }
-
-        console.log("[QuickSell] Redirecting to Paystack:", data.data.authorization_url);
-
-        // Redirect to Paystack hosted payment page
+        // redirect user to Paystack
         window.location.href = data.data.authorization_url;
-        return;
+
       } catch (err: any) {
-        console.error("[QuickSell] Paystack error:", err);
         toast({
           variant: "destructive",
           title: "Payment Failed",
-          description: err?.message || "Could not connect to Paystack",
+          description: err.message,
         });
       } finally {
         setBuying(false);
@@ -532,7 +484,7 @@ export default function QuickSell() {
 
       return;
     }
-    
+
     // WALLET
     if (!user || !profile) return;
 
@@ -681,29 +633,29 @@ export default function QuickSell() {
             </div>
 
             <div>
-              <h1 className="text-3xl font-black text-foreground">
+              <h1 className="text-3xl font-black text-black">
                 Quick Sell
               </h1>
 
-              <p className="text-muted-foreground text-sm">
+              <p className="text-gray-500 text-sm">
                 Buy data bundles instantly
               </p>
             </div>
           </div>
 
           {/* Wallet */}
-          <div className="rounded-2xl border bg-card px-5 py-4 shadow-sm">
+          <div className="rounded-2xl border bg-white px-5 py-4 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <Wallet className="h-5 w-5 text-primary" />
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Wallet Balance
                 </p>
 
-                <h3 className="text-2xl font-black text-foreground">
+                <h3 className="text-2xl font-black text-black">
                   GHS{" "}
                   {profile?.walletBalance?.toFixed(
                     2
@@ -717,7 +669,7 @@ export default function QuickSell() {
         {/* Search */}
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 
             <Input
               placeholder="Search bundles..."
@@ -727,7 +679,7 @@ export default function QuickSell() {
                   e.target.value
                 )
               }
-              className="pl-11 h-12 rounded-2xl bg-background"
+              className="pl-11 h-12 rounded-2xl bg-white"
             />
           </div>
 
@@ -756,7 +708,7 @@ export default function QuickSell() {
                   className={`rounded-2xl px-4 py-2 text-sm font-bold border transition-all ${
                     active
                       ? "scale-105 shadow-lg"
-                      : "hover:scale-105 bg-card"
+                      : "hover:scale-105 bg-white"
                   }`}
                   style={
                     active && cfg
@@ -798,16 +750,16 @@ export default function QuickSell() {
         {/* Empty */}
         {!loading &&
           filtered.length === 0 && (
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl bg-white">
               <CardContent className="py-20 flex flex-col items-center gap-4">
                 <Wifi className="h-14 w-14 text-gray-300" />
 
                 <div className="text-center">
-                  <h3 className="font-bold text-lg text-foreground">
+                  <h3 className="font-bold text-lg text-black">
                     No Bundles Found
                   </h3>
 
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-gray-500 text-sm">
                     Try another keyword
                   </p>
                 </div>
@@ -830,7 +782,7 @@ export default function QuickSell() {
                 return (
                   <div
                     key={bundle.id}
-                    className="group relative overflow-hidden rounded-3xl border border-border bg-card shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+                    className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
                   >
                     {/* Glow */}
                     <div
@@ -894,11 +846,11 @@ export default function QuickSell() {
 
                       {/* Size */}
                       <div className="space-y-1 mb-3">
-                        <h2 className="text-3xl font-black leading-none text-foreground">
+                        <h2 className="text-3xl font-black leading-none text-black">
                           {bundle.size}
                         </h2>
 
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="h-3.5 w-3.5" />
                           {
                             bundle.validity
@@ -911,10 +863,10 @@ export default function QuickSell() {
                         {isAgentPriced ? (
                           <>
                             <div className="flex items-center gap-2">
-                              <span className="text-3xl font-black text-foreground">
+                              <span className="text-3xl font-black text-black">
                                 GHS {formatGHS(discountedPrice)}
                               </span>
-                              <span className="text-sm line-through text-muted-foreground">
+                              <span className="text-sm line-through text-gray-400">
                                 GHS {formatGHS(basePrice)}
                               </span>
                             </div>
@@ -923,7 +875,7 @@ export default function QuickSell() {
                             </p>
                           </>
                         ) : (
-                          <span className="text-3xl font-black text-foreground">
+                          <span className="text-3xl font-black text-black">
                             GHS {formatGHS(basePrice)}
                           </span>
                         )}
@@ -931,12 +883,12 @@ export default function QuickSell() {
 
                       {/* Features */}
                       <div className="space-y-1.5 mb-5">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-xs text-gray-700">
                           <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                           Secure Checkout
                         </div>
 
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-xs text-gray-700">
                           <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                           Instant Delivery
                         </div>
