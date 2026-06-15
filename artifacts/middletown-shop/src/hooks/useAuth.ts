@@ -31,18 +31,32 @@ export function useAuth() {
 
       if (firebaseUser) {
         const docRef = doc(db, "users", firebaseUser.uid);
-        unsubscribeDoc = onSnapshot(docRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
-          } else {
+        unsubscribeDoc = onSnapshot(
+          docRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              setProfile(docSnap.data() as UserProfile);
+            } else {
+              setProfile(null);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("[useAuth] Firestore snapshot error:", error);
             setProfile(null);
+            setLoading(false);
           }
-          setLoading(false);
-        });
+        );
       } else {
         setProfile(null);
         setLoading(false);
       }
+    },
+    (error) => {
+      console.error("[useAuth] Auth state error:", error);
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
     });
 
     return () => {

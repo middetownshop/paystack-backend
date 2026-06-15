@@ -46,23 +46,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const snap = await getDoc(ref);
       if (snap.exists()) {
         setProfile(snap.data() as UserProfile);
+      } else {
+        console.warn("[AuthContext] No profile document found for uid:", uid);
+        setProfile(null);
       }
     } catch (err) {
-      console.error("Failed to fetch profile", err);
+      console.error("[AuthContext] Failed to fetch profile:", err);
+      setProfile(null);
     }
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        await fetchProfile(u.uid);
-      } else {
+    // Safety net: loading can never stay true forever
+    const safetyTimeout = setTimeout(() => {
+      setLoading((prev) => {
+        if (prev) {
+          console.warn("[AuthContext] Safety timeout fired — clearing loading state");
+        }
+        return false;
+      });
+    }, 8000);
+
+    const unsub = onAuthStateChanged(
+      auth,
+      async (u) => {
+        clearTimeout(safetyTimeout);
+        setUser(u);
+        if (u) {
+          await fetchProfile(u.uid);
+        } else {
+          setProfile(null);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        clearTimeout(safetyTimeout);
+        console.error("[AuthContext] onAuthStateChanged error:", error);
+        setUser(null);
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
-    });
-    return unsub;
+    );
+
+    return () => {
+      clearTimeout(safetyTimeout);
+      unsub();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -97,4 +126,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
