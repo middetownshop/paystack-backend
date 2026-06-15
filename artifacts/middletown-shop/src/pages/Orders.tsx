@@ -77,38 +77,38 @@ export default function Orders() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("AUTH USER:", user?.uid);
-    console.log("PROFILE:", profile);
-
-    if (!user || !profile) return;
+    if (!user) return;
 
     let q;
 
-    if (profile.role === "admin") {
+    if (profile?.role === "admin") {
       q = query(collection(db, "orders"));
-    } else if (profile.role === "agent") {
-      q = query(collection(db, "orders"), where("uid", "==", user.uid));
     } else {
       q = query(collection(db, "orders"), where("uid", "==", user.uid));
     }
 
-    return onSnapshot(q, (snap) => {
-      const data = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-      }));
+    return onSnapshot(
+      q,
+      (snap) => {
+        const data = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
 
-      console.log("ORDERS SNAPSHOT:", data); // 👈 ADD THIS TOO
+        data.sort(
+          (a: any, b: any) =>
+            (b.timestamp?.toMillis?.() ?? 0) -
+            (a.timestamp?.toMillis?.() ?? 0)
+        );
 
-      data.sort(
-        (a: any, b: any) =>
-          (b.timestamp?.toMillis?.() ?? 0) -
-          (a.timestamp?.toMillis?.() ?? 0)
-      );
-
-      setOrders(data);
-      setLoading(false);
-    });
+        setOrders(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("[Orders] Firestore error:", err.code);
+        setLoading(false);
+      }
+    );
   }, [user, profile]);
   
   const networks = useMemo(() => {

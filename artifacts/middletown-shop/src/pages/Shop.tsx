@@ -85,20 +85,26 @@ export default function ShopProducts() {
   useEffect(() => {
     const q = query(collection(db, "products"), where("active", "==", true));
 
-    return onSnapshot(q, (snap) => {
-      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return onSnapshot(
+      q,
+      (snap) => {
+        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-      data.sort((a: any, b: any) => {
-        const aTime =
-          a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
-        const bTime =
-          b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+        data.sort((a: any, b: any) => {
+          const aTime =
+            a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const bTime =
+            b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
 
-        return bTime - aTime;
-      });
+          return bTime - aTime;
+        });
 
-      setProducts(data);
-    });
+        setProducts(data);
+      },
+      (err) => {
+        console.error("[Shop] Firestore error:", err.code);
+      }
+    );
   }, []);
 
   const filtered = useMemo(() => {

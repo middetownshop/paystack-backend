@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: get the caller's role from their user doc
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin() { return callerRole() == 'admin'; }
+    function isAgent() { return callerRole() == 'agent'; }
+    function isAuth()  { return request.auth != null; }
+
+    // ── users ──────────────────────────────────────────────
+    // Each user reads/writes their own doc; admins read all.
+    match /users/{userId} {
+      allow read:  if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuth() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // ── products ───────────────────────────────────────────
+    // Public read (shop page requires no login); admin write.
+    match /products/{productId} {
+      allow read:  if true;
+      allow write: if isAuth() && isAdmin();
+    }
+
+    // ── bundles ────────────────────────────────────────────
+    // Public read (bundles page); admin write.
+    match /bundles/{bundleId} {
+      allow read:  if true;
+      allow write: if isAuth() && isAdmin();
+    }
+
+    // ── orders ─────────────────────────────────────────────
+    // Users read/write their own; agents read their own; admins read all.
+    match /orders/{orderId} {
+      allow read:  if isAuth() && (
+                      resource.data.uid == request.auth.uid ||
+                      isAdmin() ||
+                      isAgent()
+                   );
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+                      resource.data.uid == request.auth.uid ||
+                      isAdmin()
+                   );
+    }
+
+    // ── transactions ───────────────────────────────────────
+    // Users read their own; admins read all.
+    match /transactions/{txId} {
+      allow read:  if isAuth() && (
+                      resource.data.uid == request.auth.uid ||
+                      isAdmin()
+                   );
+      allow create: if isAuth();
+      allow update: if isAuth() && isAdmin();
+    }
+
+    // ── complaints ─────────────────────────────────────────
+    match /complaints/{complaintId} {
+      allow read:  if isAuth() && (
+                      resource.data.uid == request.auth.uid ||
+                      isAdmin()
+                   );
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+                      resource.data.uid == request.auth.uid ||
+                      isAdmin()
+                   );
+    }
+
+    // ── agent applications ─────────────────────────────────
+    match /agentApplications/{appId} {
+      allow read:  if isAuth() && (request.auth.uid == appId || isAdmin());
+      allow create: if isAuth();
+      allow update: if isAuth() && isAdmin();
+    }
+  }
+}

@@ -203,7 +203,7 @@ export default function Dashboard() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
         <Button asChild className="h-14 text-base font-semibold">
-          <Link href="/dashboard/Bundles">
+          <Link href="/dashboard/bundles">
             <Signal className="h-5 w-5 mr-2" />
             Buy Bundles
           </Link>
