@@ -1,19 +1,26 @@
 {
-  "name": "workspace",
+  "name": "@workspace/mockup-sandbox",
   "version": "0.0.0",
-  "license": "MIT",
   "private": true,
+  "type": "module",
   "scripts": {
-    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-
-    "build": "pnpm --filter @workspace/api-server run typecheck && pnpm --filter @workspace/api-server run build",
-
-    "typecheck:libs": "tsc --build",
-
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "prettier": "^3.8.3",
-    "typescript": "~5.9.3"
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@tailwindcss/postcss": "^4.3.0",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.3.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.2"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }

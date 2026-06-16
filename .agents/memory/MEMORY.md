@@ -1,3 +1,3 @@
-- [MiddletownShop theme](middletown-shop-theme.md) — sidebar must stay dark navy in both light & dark mode; primary = green; background = cool light gray
-- [MiddletownShop auth](middletown-shop-auth.md) — two auth hooks intentionally coexist; loading hang fixed via onSnapshot error handler + safety timeout
-- [MiddletownShop package.json](middletown-shop-packagejson.md) — package.json was corrupted with api-server content; correct name is @workspace/middletown-shop with vite dev scripts
+- [Nested pnpm-workspace.yaml](pnpm-workspace-nested.md) — a stray pnpm-workspace.yaml inside an artifact directory silently breaks workspace member discovery
+- [Tailwind v4 PostCSS setup](tailwind-v4-postcss.md) — switch from @tailwindcss/vite to @tailwindcss/postcss without changing any CSS syntax
+- [Sonner next-themes dep](sonner-next-themes.md) — shadcn sonner.tsx imports next-themes which isn't installed; drop it and hardcode theme="light"
