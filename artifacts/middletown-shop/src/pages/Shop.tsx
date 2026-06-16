@@ -11,19 +11,25 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
-import { MessageCircle, Star, Clock, Search } from "lucide-react";
-
-/* ================= PRICE ================= */
+import {
+  Search,
+  ShoppingCart,
+  Star,
+  Clock,
+  Package,
+  Heart,
+} from "lucide-react";
 
 function getFinalPrice(product: any) {
   const price = Number(product.price || 0);
 
-  if (!product.discountType || product.discountType === "none") return price;
+  if (!product.discountType || product.discountType === "none")
+    return price;
 
   if (product.discountType === "percent") {
     return price - (price * Number(product.discountValue || 0)) / 100;
@@ -35,8 +41,6 @@ function getFinalPrice(product: any) {
 
   return price;
 }
-
-/* ================= COUNTDOWN ================= */
 
 function getTimeLeft(end: any) {
   if (!end) return null;
@@ -51,7 +55,6 @@ function getTimeLeft(end: any) {
 
   const diff = endTime - Date.now();
 
-  if (isNaN(diff)) return null;
   if (diff <= 0) return "Expired";
 
   const hrs = Math.floor(diff / (1000 * 60 * 60));
@@ -61,50 +64,26 @@ function getTimeLeft(end: any) {
   return `${hrs}h ${mins}m ${secs}s`;
 }
 
-/* ================= FORMAT MONEY (FIXED ONLY) ================= */
-function formatMoney(value: any) {
-  const num = Number(value || 0);
-  return num.toLocaleString("en-US");
-}
-
-/* ================= MAIN ================= */
-
 export default function ShopProducts() {
   const { profile } = useAuth();
 
   const [products, setProducts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
-  const [tick, setTick] = useState(0);
-
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const q = query(collection(db, "products"), where("active", "==", true));
-
-    return onSnapshot(
-      q,
-      (snap) => {
-        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-        data.sort((a: any, b: any) => {
-          const aTime =
-            a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
-          const bTime =
-            b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
-
-          return bTime - aTime;
-        });
-
-        setProducts(data);
-      },
-      (err) => {
-        console.error("[Shop] Firestore error:", err.code);
-      }
+    const q = query(
+      collection(db, "products"),
+      where("active", "==", true)
     );
+
+    return onSnapshot(q, (snap) => {
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+
+      setProducts(data);
+    });
   }, []);
 
   const filtered = useMemo(() => {
@@ -113,139 +92,225 @@ export default function ShopProducts() {
     );
   }, [products, search]);
 
-  const markOrder = async (product: any) => {
+  const toggleSold = async (product: any) => {
     await updateDoc(doc(db, "products", product.id), {
       sold: !product.sold,
     });
   };
 
+  const addToCart = async (product: any) => {
+    console.log("cart", product);
+  };
+
+  const buyNow = async (product: any) => {
+    console.log("checkout", product);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[#f5f5f5]">
 
-      {/* ================= SMALL BANNER ================= */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl p-4 shadow">
+      {/* HEADER */}
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="bg-[#ff6a00] text-white">
 
-          <div>
-            <h2 className="text-xl font-bold">Marketplace</h2>
-            <p className="text-xs opacity-80">
-              Find products, deals & flash sales
-            </p>
+        <div className="max-w-7xl mx-auto p-4">
+
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+
+            <h1 className="text-3xl font-bold">
+              Alibaba Mini
+            </h1>
+
+            <div className="flex-1 relative w-full">
+
+              <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500" />
+
+              <Input
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-white text-black"
+              />
+            </div>
+
+            <Button
+              variant="secondary"
+              className="bg-white text-[#ff6a00]"
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Cart
+            </Button>
+
           </div>
-
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 opacity-70" />
-            <Input
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/90 text-foreground"
-            />
-          </div>
-
         </div>
       </div>
 
-      {/* ================= PRODUCTS ================= */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* FLASH SALE */}
 
-        {filtered.map((product) => {
-          const finalPrice = getFinalPrice(product);
-          const hasDiscount = finalPrice < product.price;
-          const whatsapp = product.whatsapp || "233000000000";
-          const countdown = getTimeLeft(product.promoEnd);
+      <div className="bg-red-600 text-white py-2">
 
-          return (
-            <Card
-              key={product.id}
-              className="relative overflow-hidden rounded-xl border hover:shadow-xl transition"
+        <div className="max-w-7xl mx-auto flex items-center gap-2 px-4">
+
+          <Clock className="w-4 h-4" />
+
+          <span className="font-semibold">
+            Flash Sale • Best Discounts Today
+          </span>
+
+        </div>
+
+      </div>
+
+      {/* CATEGORIES */}
+
+      <div className="max-w-7xl mx-auto px-4 py-4">
+
+        <div className="flex gap-3 overflow-x-auto">
+
+          {[
+            "All",
+            "Phones",
+            "Electronics",
+            "Fashion",
+            "Computers",
+            "Gaming",
+            "Accessories",
+          ].map((cat) => (
+            <Button
+              key={cat}
+              variant="outline"
+              className="rounded-full"
             >
+              {cat}
+            </Button>
+          ))}
 
-              <div className="relative w-full h-62">
-                <img
-                  src={product.image}
-                  className="w-full h-full object-cover"
-                />
+        </div>
 
-                <div className="absolute top-2 left-2">
-                  <Badge className={product.sold ? "bg-gray-700" : "bg-green-500"}>
-                    {product.sold ? "Sold" : "Available"}
-                  </Badge>
-                </div>
+      </div>
 
-                {hasDiscount && (
-                  <div className="absolute top-2 right-2">
-                    <Badge className="bg-red-500 text-white">
-                      -{formatMoney(product.discountValue)}
-                      {product.discountType === "percent" ? "%" : " GHS"}
-                    </Badge>
-                  </div>
-                )}
+      {/* PRODUCTS */}
 
-                {countdown && (
-                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {countdown}
-                  </div>
-                )}
-              </div>
+      <div className="max-w-7xl mx-auto p-4">
 
-              <CardContent className="space-y-1 pt-2 pb-2">
-                <h3 className="font-bold text-lg line-clamp-1">
-                  {product.name}
-                </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
 
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {product.description}
-                </p>
+          {filtered.map((product) => {
+            const finalPrice = getFinalPrice(product);
 
-                <div className="flex items-center gap-1 text-yellow-500 text-sm">
-                  <Star className="w-4 h-4 fill-yellow-500" />
-                  {product.rating || 4.5}
-                </div>
+            const hasDiscount =
+              finalPrice < Number(product.price);
 
-                <div>
+            const countdown = getTimeLeft(product.promoEnd);
+
+            return (
+              <Card
+                key={product.id}
+                className="overflow-hidden hover:shadow-xl transition bg-white"
+              >
+                <div className="relative">
+
+                  <img
+                    src={product.image}
+                    className="w-full h-52 object-cover"
+                  />
+
+                  <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow">
+                    <Heart className="w-4 h-4" />
+                  </button>
+
                   {hasDiscount && (
-                    <p className="text-xs line-through text-muted-foreground">
-                      GHS {formatMoney(product.price)}
-                    </p>
+                    <Badge className="absolute top-2 left-2 bg-red-500">
+                      -
+                      {product.discountType === "percent"
+                        ? `${product.discountValue}%`
+                        : `GHS ${product.discountValue}`}
+                    </Badge>
                   )}
 
-                  <p className="text-xl font-bold text-green-600">
-                    GHS {formatMoney(finalPrice)}
-                  </p>
                 </div>
-              </CardContent>
 
-              <CardFooter className="flex flex-col gap-2">
+                <CardContent className="p-3">
 
-                <a
-                  href={`https://wa.me/${whatsapp}`}
-                  target="_blank"
-                  className="w-full"
-                >
-                  <Button className="w-full bg-green-500 hover:bg-green-600">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Chat Seller
-                  </Button>
-                </a>
+                  <h3 className="font-semibold line-clamp-2 min-h-[50px]">
+                    {product.name}
+                  </h3>
 
-                {profile?.role === "admin" && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => markOrder(product)}
-                  >
-                    Mark as {product.sold ? "Available" : "Sold"}
-                  </Button>
-                )}
+                  <div className="flex items-center gap-1 mt-1">
 
-              </CardFooter>
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
 
-            </Card>
-          );
-        })}
+                    <span className="text-sm">
+                      {product.rating || 4.5}
+                    </span>
+
+                  </div>
+
+                  <div className="mt-2">
+
+                    {hasDiscount && (
+                      <div className="text-xs text-gray-400 line-through">
+                        GHS {product.price}
+                      </div>
+                    )}
+
+                    <div className="text-xl font-bold text-[#ff6a00]">
+                      GHS {finalPrice}
+                    </div>
+
+                  </div>
+
+                  {countdown && (
+                    <div className="text-xs text-red-600 mt-1">
+                      Ends in {countdown}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
+
+                    <Package className="w-3 h-3" />
+
+                    {product.stock || 0} in stock
+
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+
+                    <Button
+                      className="w-full bg-[#ff6a00] hover:bg-[#e85f00]"
+                      onClick={() => buyNow(product)}
+                    >
+                      Buy Now
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => addToCart(product)}
+                    >
+                      Add To Cart
+                    </Button>
+
+                    {profile?.role === "admin" && (
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        onClick={() => toggleSold(product)}
+                      >
+                        {product.sold
+                          ? "Mark Available"
+                          : "Mark Sold"}
+                      </Button>
+                    )}
+
+                  </div>
+
+                </CardContent>
+
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

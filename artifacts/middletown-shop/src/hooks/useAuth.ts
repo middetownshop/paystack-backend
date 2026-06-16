@@ -19,50 +19,28 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let unsubscribeDoc: (() => void) | undefined;
-
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
 
-      if (unsubscribeDoc) {
-        unsubscribeDoc();
-        unsubscribeDoc = undefined;
-      }
-
       if (firebaseUser) {
         const docRef = doc(db, "users", firebaseUser.uid);
-        unsubscribeDoc = onSnapshot(
-          docRef,
-          (docSnap) => {
-            if (docSnap.exists()) {
-              setProfile(docSnap.data() as UserProfile);
-            } else {
-              setProfile(null);
-            }
-            setLoading(false);
-          },
-          (error) => {
-            console.error("[useAuth] Firestore snapshot error:", error);
+        const unsubscribeDoc = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as UserProfile);
+          } else {
             setProfile(null);
-            setLoading(false);
           }
-        );
+          setLoading(false);
+        });
+
+        return () => unsubscribeDoc();
       } else {
         setProfile(null);
         setLoading(false);
       }
-    },
-    (error) => {
-      console.error("[useAuth] Auth state error:", error);
-      setUser(null);
-      setProfile(null);
-      setLoading(false);
     });
 
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeDoc) unsubscribeDoc();
-    };
+    return () => unsubscribeAuth();
   }, []);
 
   const signOut = () => firebaseSignOut(auth);

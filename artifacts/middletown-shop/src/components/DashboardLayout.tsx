@@ -16,12 +16,14 @@ import {
   Store,
   ShoppingBag,
   Zap,
+  Sparkles,
   Wifi,
   Menu,
   X,
 } from "lucide-react";
 
 import { format } from "date-fns";
+
 import { Button } from "@/components/ui/button";
 
 export function DashboardLayout({
@@ -32,17 +34,26 @@ export function DashboardLayout({
   const { user, profile, signOut, loading } = useAuth();
 
   const [location, setLocation] = useLocation();
-  const [time, setTime] = useState(new Date());
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  /* REDIRECT IF NOT LOGGED IN */
+  const [time, setTime] = useState(new Date());
+
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
+
+  /* =====================================================
+     REDIRECT IF NOT LOGGED IN
+  ===================================================== */
+
   useEffect(() => {
     if (!loading && !user) {
       setLocation("/login");
     }
   }, [user, loading, setLocation]);
 
-  /* LIVE CLOCK */
+  /* =====================================================
+     LIVE CLOCK
+  ===================================================== */
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
@@ -51,74 +62,152 @@ export function DashboardLayout({
     return () => clearInterval(timer);
   }, []);
 
-  /* LOADING */
-  if (loading) {
+  /* =====================================================
+     LOADING
+  ===================================================== */
+
+  if (loading || !user || !profile) {
     return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="h-4 w-40 bg-muted rounded animate-pulse"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-8 w-32 bg-gray-200 rounded mb-4"></div>
+
+          <div className="h-4 w-40 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
   }
 
-  /* SAFE PROFILE (IMPORTANT FIX) */
-  const safeProfile = profile ?? {
-    name: "User",
-    role: "user",
-    walletBalance: 0,
-  };
+  /* =====================================================
+     GREETING
+  ===================================================== */
 
   const getGreeting = () => {
     const h = time.getHours();
+
     if (h < 12) return "Good morning";
+
     if (h < 18) return "Good afternoon";
+
     return "Good evening";
   };
 
+  /* =====================================================
+     RESET TIMER
+  ===================================================== */
+
   const getTimeToMidnight = () => {
     const midnight = new Date(time);
+
     midnight.setHours(24, 0, 0, 0);
 
-    const diff = midnight.getTime() - time.getTime();
+    const diff =
+      midnight.getTime() - time.getTime();
 
     const hours = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    const secs = Math.floor((diff % 60000) / 1000);
 
-    return `${hours.toString().padStart(2, "0")}:${mins
+    const mins = Math.floor(
+      (diff % 3600000) / 60000
+    );
+
+    const secs = Math.floor(
+      (diff % 60000) / 1000
+    );
+
+    return `${hours
       .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+      .padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
+  /* =====================================================
+     NAVIGATION
+  ===================================================== */
+
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/shop", label: "Shop Products", icon: Store },
-    { href: "/dashboard/bundles", label: "Data Bundles", icon: Wifi },
-    { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
-    { href: "/dashboard/quick-sell", label: "Quick Sell", icon: Zap },
-    { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-    { href: "/dashboard/deposit", label: "Deposit", icon: ArrowDownToLine },
-    { href: "/dashboard/withdraw", label: "Withdraw", icon: ArrowUpFromLine },
-    { href: "/dashboard/transactions", label: "Transactions", icon: History },
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
+
+    {
+      href: "/dashboard/shop",
+      label: "Shop Products",
+      icon: Store,
+    },
+
+    {
+      href: "/dashboard/bundles",
+      label: "Data Bundles",
+      icon: Wifi,
+    },
+
+    {
+      href: "/dashboard/orders",
+      label: "Orders",
+      icon: ShoppingBag,
+    },
+
+    {
+      href: "/dashboard/quick-sell",
+      label: "Quick Sell",
+      icon: Zap,
+    },
+
+    {
+      href: "/dashboard/wallet",
+      label: "Wallet",
+      icon: Wallet,
+    },
+
+    {
+      href: "/dashboard/deposit",
+      label: "Deposit",
+      icon: ArrowDownToLine,
+    },
+
+    {
+      href: "/dashboard/withdraw",
+      label: "Withdraw",
+      icon: ArrowUpFromLine,
+    },
+
+    {
+      href: "/dashboard/transactions",
+      label: "Transactions",
+      icon: History,
+    },
   ];
 
-  if (safeProfile.role !== "admin") {
-    navItems.push(
-      {
-        href: "/dashboard/complaints/new",
-        label: "Submit Complaint",
-        icon: MessageSquareWarning,
-      },
-      {
-        href: "/dashboard/complaints",
-        label: "My Complaints",
-        icon: MessageSquareWarning,
-      }
-    );
+  /* =====================================================
+     USER COMPLAINTS
+  ===================================================== */
+
+  if (profile.role !== "admin") {
+    navItems.push({
+      href: "/dashboard/complaints/new",
+      label: "Submit Complaint",
+      icon: MessageSquareWarning,
+    });
+
+    navItems.push({
+      href: "/dashboard/complaints",
+      label: "My Complaints",
+      icon: MessageSquareWarning,
+    });
   }
 
+  /* =====================================================
+     BECOME AGENT
+  ===================================================== */
+
   if (
-    safeProfile.role !== "agent" &&
-    safeProfile.role !== "admin"
+    profile.role !== "agent" &&
+    profile.role !== "admin"
   ) {
     navItems.push({
       href: "/dashboard/agent-register",
@@ -127,9 +216,13 @@ export function DashboardLayout({
     });
   }
 
+  /* =====================================================
+     AGENT PANEL
+  ===================================================== */
+
   if (
-    safeProfile.role === "agent" ||
-    safeProfile.role === "admin"
+    profile.role === "agent" ||
+    profile.role === "admin"
   ) {
     navItems.push({
       href: "/dashboard/agent",
@@ -138,147 +231,316 @@ export function DashboardLayout({
     });
   }
 
-  if (safeProfile.role === "admin") {
-    navItems.push(
-      {
-        href: "/dashboard/admin",
-        label: "Admin Panel",
-        icon: ShieldAlert,
-      },
-      {
-        href: "/admin/complaints",
-        label: "User Complaints",
-        icon: MessageSquareWarning,
-      }
-    );
+  /* =====================================================
+     ADMIN PANEL
+  ===================================================== */
+
+  if (profile.role === "admin") {
+    navItems.push({
+      href: "/dashboard/admin",
+      label: "Admin Panel",
+      icon: ShieldAlert,
+    });
+
+    navItems.push({
+      href: "/admin/complaints",
+      label: "User Complaints",
+      icon: MessageSquareWarning,
+    });
   }
 
-  const NavLink = ({ item }: { item: typeof navItems[0] }) => {
-    const isActive = location === item.href;
-    return (
-      <Link
-        key={item.href}
-        href={item.href}
-        onClick={() => setSidebarOpen(false)}
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-          isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        }`}
-      >
-        <item.icon className="w-4 h-4 shrink-0" />
-        {item.label}
-      </Link>
-    );
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-4">
+    <div className="min-h-screen bg-[#f8f9fb] text-black">
+
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-3 md:px-6 shadow-sm">
+
+        {/* LEFT */}
         <div className="flex items-center gap-3">
+
+          {/* MOBILE MENU BUTTON */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden text-foreground"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="h-6 w-6 text-black" />
           </button>
 
-          <div className="font-bold text-foreground">
-            MiddletownShop
+          {/* LOGO */}
+          <div className="flex flex-col">
+            <span className="font-black text-sm md:text-lg tracking-wide">
+              <span className="text-red-600">
+                Middle
+              </span>
+
+              <span className="text-yellow-500">
+                Town
+              </span>
+
+              <span className="text-black">
+                Shop
+              </span>
+            </span>
+
+            <span className="text-[10px] sm:hidden text-gray-600">
+              {getGreeting()}, {profile.name}
+            </span>
           </div>
         </div>
 
-        <div className="hidden md:flex flex-col items-center text-center">
-          <span className="text-sm font-medium text-foreground">
-            {getGreeting()}, {safeProfile.name}
+        {/* CENTER */}
+        <div className="hidden md:flex flex-col">
+          <span className="text-sm font-medium">
+            {getGreeting()},
+
+            <span className="text-red-600 ml-1">
+              {profile.name}
+            </span>
           </span>
-          <span className="text-xs text-muted-foreground">
-            {format(time, "EEE, MMM d yyyy")} &middot; {format(time, "HH:mm:ss")}
+
+          <span className="text-xs text-gray-500">
+            {profile.role?.toUpperCase()}
           </span>
         </div>
 
-        <Button variant="ghost" size="icon">
-          <Bell className="w-4 h-4" />
-        </Button>
+        {/* RIGHT */}
+        <div className="flex items-center gap-2 md:gap-4">
+
+          {/* DATE */}
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] md:text-xs text-gray-500">
+              {format(time, "EEE MMM d yyyy")}
+            </span>
+
+            <span className="text-[11px] md:text-sm font-semibold text-black">
+              {format(time, "HH:mm:ss")}
+            </span>
+          </div>
+
+          {/* RESET TIMER */}
+          <div className="hidden lg:flex flex-col items-end">
+            <span className="text-[10px] text-gray-500">
+              Reset Timer
+            </span>
+
+            <span className="text-xs font-bold text-yellow-600">
+              {getTimeToMidnight()}
+            </span>
+          </div>
+
+          {/* BELL */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-red-50"
+          >
+            <Bell className="h-5 w-5 text-red-600" />
+          </Button>
+        </div>
       </header>
 
-      {/* MOBILE SIDEBAR OVERLAY */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-sidebar text-sidebar-foreground flex flex-col p-4 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="font-bold text-sidebar-foreground">
-                {safeProfile.name}
-              </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      <div className="flex pt-16">
 
-            <nav className="flex flex-col gap-1 flex-1">
-              {navItems.map((item) => (
-                <NavLink key={item.href} item={item} />
-              ))}
-            </nav>
+        {/* MOBILE OVERLAY */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
+          />
+        )}
+
+        {/* =====================================================
+            SIDEBAR
+        ===================================================== */}
+
+        <aside
+          className={`
+            fixed top-0 left-0 z-50 h-screen w-72 bg-white border-r border-gray-200
+            transform transition-transform duration-300 overflow-y-auto
+            ${
+              sidebarOpen
+                ? "translate-x-0"
+                : "-translate-x-full"
+            }
+            md:translate-x-0 md:top-16 md:h-[calc(100vh-64px)]
+          `}
+        >
+
+          {/* MOBILE CLOSE */}
+          <div className="md:hidden flex items-center justify-between px-4 h-16 border-b">
+            <span className="font-bold text-lg">
+              Menu
+            </span>
 
             <button
-              onClick={signOut}
-              className="mt-6 flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 transition-colors rounded-lg hover:bg-sidebar-accent"
+              onClick={() =>
+                setSidebarOpen(false)
+              }
+              className="p-2 rounded-lg hover:bg-gray-100"
             >
-              <LogOut className="w-4 h-4" />
-              Logout
+              <X className="h-5 w-5" />
             </button>
-          </aside>
-        </div>
-      )}
-
-      <div className="flex pt-16">
-        {/* DESKTOP SIDEBAR */}
-        <aside className="w-64 hidden md:flex flex-col fixed top-16 bottom-0 left-0 bg-sidebar text-sidebar-foreground border-r border-sidebar-border overflow-y-auto">
-          <div className="p-4 flex-1">
-            <div className="mb-5 px-3">
-              <p className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-1">
-                Account
-              </p>
-              <p className="text-sm font-semibold text-sidebar-foreground">
-                {safeProfile.name}
-              </p>
-              <p className="text-xs text-sidebar-foreground/60 capitalize">
-                {safeProfile.role}
-              </p>
-            </div>
-
-            <nav className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <NavLink key={item.href} item={item} />
-              ))}
-            </nav>
           </div>
 
-          <div className="p-4 border-t border-sidebar-border">
+          {/* PROFILE */}
+          <div className="px-5 py-5 border-b border-gray-100">
+
+            <div className="bg-black text-white rounded-2xl p-4 shadow-lg">
+
+              <p className="text-xs text-gray-300">
+                Logged in as
+              </p>
+
+              <h2 className="font-bold text-lg mt-1">
+                {profile.name}
+              </h2>
+
+              <div className="mt-2 inline-flex px-2 py-1 rounded-md bg-red-600 text-xs font-medium">
+                {profile.role?.toUpperCase()}
+              </div>
+
+              {/* WALLET */}
+              <div className="mt-4 bg-red-600 rounded-xl p-3">
+
+                <p className="text-[11px] uppercase tracking-wide text-red-100">
+                  Wallet Balance
+                </p>
+
+                <h3 className="text-2xl font-black text-white mt-1">
+                  GHS{" "}
+                  {profile.walletBalance?.toFixed(
+                    2
+                  ) || "0.00"}
+                </h3>
+              </div>
+            </div>
+          </div>
+
+          {/* =====================================================
+              NAVIGATION
+          ===================================================== */}
+
+          <nav className="p-4 space-y-1">
+
+            {navItems.map((item) => {
+              const active =
+                location === item.href ||
+                (item.href !== "/dashboard" &&
+                  location.startsWith(
+                    item.href
+                  ));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() =>
+                    setSidebarOpen(false)
+                  }
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all
+                    ${
+                      active
+                        ? "bg-gradient-to-r from-red-600 to-yellow-500 text-white shadow-md"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }
+                  `}
+                >
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+
+                  <span className="font-medium">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* PREMIUM CARD */}
+          <div className="px-4 mt-4">
+
+            <div className="rounded-2xl bg-gradient-to-br from-yellow-100 to-red-100 p-4 border border-yellow-200">
+
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-red-600" />
+
+                <span className="font-semibold text-sm">
+                  Premium Tools
+                </span>
+              </div>
+
+              <p className="text-xs text-gray-600 mt-2">
+                Manage your products,
+                bundles and sales easily.
+              </p>
+
+              <button className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-medium">
+                Upgrade Plan
+              </button>
+            </div>
+          </div>
+
+          {/* LOGOUT */}
+          <div className="p-4 mt-6 border-t">
+
             <button
               onClick={signOut}
-              className="flex items-center gap-2 px-3 py-2 w-full text-sm text-red-400 hover:text-red-300 transition-colors rounded-lg hover:bg-sidebar-accent"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition"
             >
-              <LogOut className="w-4 h-4" />
-              Logout
+              <LogOut className="h-5 w-5" />
+
+              <span className="font-medium">
+                Sign Out
+              </span>
             </button>
           </div>
         </aside>
 
-        {/* MAIN CONTENT */}
-        <main className="flex-1 md:ml-64 p-4 md:p-6 min-h-[calc(100vh-4rem)]">
+        {/* =====================================================
+            MAIN CONTENT
+        ===================================================== */}
+
+        <main className="flex-1 md:ml-72 p-3 md:p-6 pb-20 md:pb-6">
           {children}
         </main>
       </div>
+
+      {/* =====================================================
+          MOBILE BOTTOM NAV
+      ===================================================== */}
+
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 h-16 flex items-center justify-around">
+
+        {navItems.slice(0, 5).map((item) => {
+          const active =
+            location === item.href ||
+            (item.href !== "/dashboard" &&
+              location.startsWith(
+                item.href
+              ));
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex flex-col items-center justify-center text-[10px] ${
+                active
+                  ? "text-red-600"
+                  : "text-gray-500"
+              }`}
+            >
+              <item.icon className="h-5 w-5 mb-1" />
+
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
